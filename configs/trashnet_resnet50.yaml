@@ -1,0 +1,67 @@
+# EcoSort TrashNet 6类配置 - ResNet50
+# 使用类别加权处理轻微不平衡
+
+# 模型配置
+model:
+  type: "resnet"
+  backbone: "resnet50"
+  num_classes: 6
+  pretrained: true
+  dropout: 0.3
+  use_attention: false
+
+# 数据配置
+data:
+  root_dir: "data/raw"
+  img_size: 224  # ResNet 标准输入
+  batch_size: 32
+  num_workers: 4
+  val_split: 0.2
+  shuffle: true
+
+  # TrashNet 6 类的样本分布（用于类别加权）
+  # paper: 594, glass: 501, plastic: 482, metal: 410, cardboard: 403, trash: 137
+  class_counts: [594, 501, 482, 410, 403, 137]
+  use_class_weights: true  # 启用类别加权
+
+# 训练配置
+training:
+  epochs: 50
+  learning_rate: 0.001
+  optimizer: "adamw"
+  weight_decay: 0.0001
+  scheduler: "cosine"
+  use_amp: true
+  early_stopping_patience: 10
+  gradient_clip_val: 1.0
+
+# 损失函数
+loss:
+  type: "cross_entropy"
+  label_smoothing: 0.1
+  # 类别权重将在训练时根据 class_counts 自动计算
+
+# 数据增强（针对 TrashNet 优化）
+augmentation:
+  horizontal_flip_prob: 0.5
+  vertical_flip_prob: 0.0  # 垃圾通常不需要垂直翻转
+  rotation_degrees: 15
+  color_jitter:
+    brightness: 0.2
+    contrast: 0.2
+    saturation: 0.2
+  random_crop: true
+  scale_range: [0.8, 1.0]  # 随机裁剪比例
+
+# 检查点配置
+checkpoint:
+  dir: "checkpoints"
+  save_interval: 10
+  save_best_only: true
+
+# WandB 配置
+wandb:
+  project: "ecosort-trashnet"
+  entity: null
+  tags: ["trashnet", "6-class", "resnet50"]
+  notes: "TrashNet 6-class classification with class weighting"

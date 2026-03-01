@@ -1,0 +1,88 @@
+# EcoSort 数据集类别映射配置
+# 将各种外部数据集的类别映射到 EcoSort 4 类系统
+
+# EcoSort 目标类别
+target_classes:
+  - recyclable    # 可回收物
+  - hazardous     # 有害垃圾
+  - kitchen       # 厨余垃圾
+  - other         # 其他垃圾
+
+# TrashNet 数据集映射 (6 -> 4)
+trashnet_mapping:
+  cardboard: recyclable
+  glass: recyclable
+  metal: recyclable
+  paper: recyclable
+  plastic: recyclable
+  trash: other
+
+# Garbage Classification 数据集映射
+# 常见类别: batteries, biological, brown-glass, cardboard, clothes,
+            # green-glass, metal, paper, plastic, shoes, trash, white-glass
+garbage_classification_mapping:
+  # 可回收物
+  cardboard: recyclable
+  paper: recyclable
+  plastic: recyclable
+  metal: recyclable
+  brown-glass: recyclable
+  green-glass: recyclable
+  white-glass: recyclable
+  clothes: recyclable  # 部分可回收
+
+  # 有害垃圾
+  batteries: hazardous
+
+  # 厨余垃圾
+  biological: kitchen
+
+  # 其他垃圾
+  shoes: other
+  trash: other
+
+# Waste Classification 数据集映射
+# 常见类别: organic, recyclable, hazardous, landfill
+waste_classification_mapping:
+  organic: kitchen
+  recyclable: recyclable
+  hazardous: hazardous
+  landfill: other
+
+# 自定义映射规则
+custom_rules:
+  # 如果类别名包含以下关键词，映射到对应类别
+  keyword_mapping:
+    recyclable:
+      - recycle
+      - plastic
+      - paper
+      - glass
+      - metal
+      - can
+      - bottle
+      - cardboard
+
+    hazardous:
+      - battery
+      - hazard
+      - toxic
+      - chemical
+      - medical
+      - pill
+      - tube
+
+    kitchen:
+      - food
+      - organic
+      - bio
+      - kitchen
+      - waste
+      - fruit
+      - vegetable
+
+    other:
+      - trash
+      - landfill
+      - residue
+      - general

@@ -1,0 +1,57 @@
+# EcoSort EfficientNet-B3 Configuration
+
+# 模型配置
+model:
+  type: "efficientnet"
+  backbone: "efficientnet-b3"
+  num_classes: 6
+  pretrained: true
+  dropout: 0.3
+  drop_connect_rate: 0.2
+
+# 数据配置
+data:
+  root_dir: "data/raw"
+  img_size: 256
+  batch_size: 32
+  num_workers: 4
+  val_split: 0.2
+  shuffle: true
+
+# 训练配置
+training:
+  epochs: 50
+  learning_rate: 0.001
+  optimizer: "adamw"
+  weight_decay: 0.0001
+  scheduler: "cosine"
+  use_amp: true
+  early_stopping_patience: 10
+  gradient_clip_val: 1.0
+
+# 损失函数
+loss:
+  type: "cross_entropy"
+  label_smoothing: 0.1
+
+# 数据增强
+augmentation:
+  horizontal_flip_prob: 0.5
+  vertical_flip_prob: 0.2
+  rotation_degrees: 15
+  color_jitter:
+    brightness: 0.3
+    contrast: 0.3
+    saturation: 0.3
+
+# 检查点配置
+checkpoint:
+  dir: "checkpoints"
+  save_interval: 10
+  save_best_only: true
+
+# WandB 配置
+wandb:
+  project: "ecosort-classification"
+  entity: null
+  tags: ["efficientnet", "b3"]
