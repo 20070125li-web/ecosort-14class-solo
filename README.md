@@ -1,76 +1,273 @@
-# ♻️ EcoSort: Edge-Cloud Cascade Waste Classification System
+# ♻️ EcoSort: Edge-Cloud Waste Classification for Real-World Deployment
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face-yellow)](https://students-cs-ecosort-14class-demo.hf.space/)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Framework](https://img.shields.io/badge/Framework-PyTorch-red)](#)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Live Demo: https://students-cs-ecosort-14class-demo.hf.space/
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Hugging%20Face-yellow)](https://huggingface.co/spaces/Students-CS/ecosort-14class-demo)
-[![Model Version](https://img.shields.io/badge/Model-v1.0-blue)](#)
-[![Framework](https://img.shields.io/badge/Framework-PyTorch-red)](#)
+---
 
-> **A student developer's journey of building an edge-optimized AI classification system, from data cleaning to serverless deployment.**
+## Project Summary
+<img width="2816" height="1536" alt="_20260227214111_32183_14" src="https://github.com/user-attachments/assets/93f1f33b-3aaf-4776-bf8e-a0a8eec8ef61" />
+EcoSort is a student-built computer vision system designed to classify everyday waste under realistic constraints, not only benchmark-friendly conditions. The project focuses on practical engineering decisions: class remapping, robust preprocessing, edge-ready inference, and cloud-assisted fallback when confidence is low.
 
-## 📌 Links
-* **Interactive Web App:** [EcoSort-14Class Demo on Hugging Face](https://huggingface.co/spaces/Students-CS/ecosort-14class-demo)
-* **Model Weights (Releases):** [Check out v1.0 checkponts](https://github.com/20070125li-web/ecosort-14class/releases)
+This repository includes end-to-end components:
+
+- data and mapping configurations,
+- training and evaluation pipelines,
+- a Flask inference backend,
+- an interactive demo interface,
+- deployment-ready model packaging.
+
+The core objective is to make waste classification reliable in real usage scenarios, where images are noisy, classes are imbalanced, and deployment resources are limited.
 
 ---
 
-## 📖 Project Overview
+## Why This Project Matters
 
-EcoSort is not just another tutorial project using standard datasets. It was built to solve a real-world problem: **How to accurately classify daily waste on edge devices with limited computing power?** Currently running on **Model v1.0**, the system uses an EfficientNet-B3 backbone trained on a highly customized, manually audited 14-class dataset. It features a lightweight local inference engine backed by a manual cloud LLM fallback mechanism.
+Many waste classification demos report high accuracy on simplified datasets but fail in real environments. EcoSort was built to close that gap. The project addresses four practical challenges:
 
-<img width="2816" height="1536" alt="_20260227214111_32183_14" src="https://github.com/user-attachments/assets/48c5f766-5955-4b29-9053-1de4a0b98f81" />
+1. **Taxonomy mismatch** between research datasets and local sorting behavior.
+2. **Class imbalance and distribution shift** that inflate benchmark metrics.
+3. **Edge inference constraints** in memory, latency, and model size.
+4. **Ambiguous samples** that require human-in-the-loop or cloud verification.
 
----
-
-## 🛠️ Development Log: The Problem-Solving Journey
-
-As a student developer, building this system was a process of constant trial, error, and iteration. Here is how EcoSort evolved:
-
-### Phase 1: The Data Trap & The 14-Class Taxonomy
-Initially, I used the standard **TrashNet** dataset (6 classes) and achieved a 0.96 accuracy with ResNet. However, real-world tests failed miserably. I realized the high accuracy was a "fake" metric caused by severe class imbalance (the 'trash' class was only 5.4%) and lack of intra-class variance.
-
-I then crawled a 44-class dataset but found many categories completely irrelevant to daily waste. **My solution? I spent over 15 days downloading, manually auditing, cleaning, and re-mapping thousands of images.** I designed a highly practical **14-class taxonomy** based on physical properties and recycling policies. For example:
-* `brick` + `ceramic` ➔ `brick_ceramic` (similar texture and disposal method)
-* `cigarette`, `diaper`, `mask`, `tissue` ➔ `hygiene_contaminated`
-* `battery`, `bulb`, `medicine` ➔ Detailed hazardous categories (`haz_battery`, `haz_device`, `haz_medicine`)
-
-### Phase 2: Edge Computing Constraints
-My goal is to eventually deploy this on smart trash cans. Initially, I used ResNet-50, but it was too heavy for edge inference:
-* **ResNet-50:** ~25.6M parameters, ~4.1G FLOPs.
-* **EfficientNet-B3 (My Choice):** ~12M parameters, ~1.8G FLOPs.
-
-By leveraging Compound Scaling, EfficientNet-B3 cut the computational cost by more than half while maintaining feature extraction capabilities. My customized dataset + EfficientNet achieved a stable validation accuracy of **91.27%** and an F1 score of **0.9259**.
-
-### Phase 3: Handling Image Distortion (Letterbox)
-I noticed the model struggled with items of extreme aspect ratios (like long chopsticks or wide cardboard). Standard resizing squashes these features. I implemented a **Letterbox padding** step in the preprocessing pipeline: scaling the longest side and padding the shortest side with solid black (0,0,0) pixels. This significantly improved the model's robustness to diverse image dimensions.
-
-### Phase 4: The Deployment Hustle (Serverless Architecture)
-Deploying the backend was the hardest engineering challenge due to lack of funds and hardware:
-1.  **Streamlit/Flask Local:** Couldn't expose to the public web stably.
-2.  **Render:** Failed because my model checkpoint was 149MB (Render free tier limits files to 100MB, and I couldn't bypass it without a credit card).
-3.  **The Serverless Hack:** I utilized **GitHub Releases** as my free large-object storage for the 149MB model weights. Then, I hosted the front-end and computing environment on **Hugging Face Spaces**. The web app automatically fetches the latest model from GitHub upon initialization. Zero cost, zero local server needed.
-
-### Phase 5: Human-in-the-Loop & Fallback Mechanism
-Since Model v1.0 isn't perfect, I designed a fail-safe interactive UI:
-* **Manual Bounding Box:** Users can draw a box on the web UI to isolate a single item from a cluttered background.
-* **AI Fallback (Gemini-2.5-Flash):** If the user is unsatisfied with the local model's prediction, they can manually click a button to trigger the VLM API. The prompt strictly constrains the AI to output within my 14 categories.
-* **Data Flywheel:** Users can report misclassifications, turning this webpage into an active data collection tool for training **EcoSort v2.0**.
+Instead of optimizing only for one headline metric, EcoSort prioritizes robustness and deployment feasibility.
 
 ---
 
-## 🚀 How to Use the Demo
+## Technical Contributions
 
-1.  Visit the [Hugging Face Space](https://huggingface.co/spaces/Students-CS/ecosort-14class-demo).
-2.  **Upload an image** or take a photo.
-3.  (Optional) Draw a bounding box around the target item.
-4.  Get the prediction and recycling advice.
-5.  If the result seems wrong, click the **AI Fallback** button to request a secondary analysis from Gemini VLM.
+### 1) Data-Centric Taxonomy Engineering
+
+The class design evolved from broad category baselines to a practical 14-class scheme for daily usage. Several classes were merged or split based on visual confusion and disposal semantics.
+
+Examples:
+
+- Hazard-like chemicals were merged into plastic-related handling where visual overlap dominated errors.
+- A mixed residual class was decomposed into more consistent subgroups such as `small_hard_items`, `foam`, and `brick_ceramic`.
+- Hygiene-contaminated classes were grouped for operational relevance.
+
+This remapping reduced confusion concentration and improved per-class stability.
+
+### 2) EfficientNet-B3 for Edge-Oriented Inference
+
+The final model family centers on EfficientNet-B3 due to favorable performance-to-compute trade-offs. The architecture choice balances representation power and deployment practicality.
+
+### 3) Letterbox Preprocessing for Aspect-Ratio Robustness
+
+EcoSort uses longest-side resize with padding to preserve object shape cues for elongated or irregular items. This is critical for classes where geometric distortion from naive resizing causes systematic errors.
+
+### 4) Edge-Cloud Cascade Design
+
+Local inference serves as the primary path for speed and cost control. A cloud VLM fallback can be triggered for difficult cases, creating a practical reliability layer without forcing all requests through a remote model.
+
+### 5) Feedback Loop for Continuous Improvement
+
+The demo includes edge-case reporting to capture misclassifications and uncertain samples, enabling iterative dataset updates and future model versions.
 
 ---
 
-## 🔮 Future Roadmap
-* **Real-time Video Inference:** Implement frame extraction to support live camera feeds (currently paused due to UI layout and inference latency).
-* **WebAssembly (WASM):** Quantize the model (INT8/FP16) to run directly inside the browser using ONNX, eliminating server latency completely.
-* **Train Model v2.0:** Utilize the edge-cases collected from the web app's reporting system.
+## Repository Structure
+
+```text
+ecosort/
+├── backend/                # Flask API for inference and optional VLM fallback
+├── src/                    # Core modules: data, models, train, utils
+├── experiments/            # Training and evaluation entry points
+├── configs/                # Model, training, and mapping configurations
+├── scripts/                # Utility scripts for automation and analysis
+├── docs/                   # Technical notes, reports, and guides
+├── checkpoints/            # Experiment outputs and analysis artifacts (DVC-oriented)
+├── data/                   # Local data workspace
+├── streamlit_demo.py       # Demo app
+├── environment.yml         # Conda environment definition
+└── requirements.txt        # Pip dependency list
+```
 
 ---
+
+## Quick Start
+
+### 1) Environment Setup
+
+```bash
+conda env create -f environment.yml
+conda activate ecosort
+pip install -r requirements.txt
+```
+
+### 2) Training
+
+```bash
+python experiments/train_baseline.py \
+  --config configs/efficientnet_b3.yaml \
+  --data-root data/proc
+```
+
+### 3) Evaluation
+
+```bash
+python experiments/evaluate.py \
+  --checkpoint checkpoints/<exp_name>/best_model.pth \
+  --data-root data/proc \
+  --model-type efficientnet
+```
+
+### 4) Run Backend API
+
+```bash
+python backend/app.py
+```
+
+### 5) Run Demo
+
+```bash
+streamlit run streamlit_demo.py
+```
+
+---
+
+## Quantitative Results
+
+The following figures summarize model selection and diagnostics for application-style reporting. Labels in comparison plots are standardized as release aliases (`v1.0` to `v2.0`) to improve readability.
+
+### A. Leaderboard Across Candidate Models
+
+![Model Leaderboard](docs/figures/admissions/01_model_leaderboard.png)
+
+This chart compares macro-F1 and accuracy across multiple training configurations under a consistent evaluation protocol. It highlights ranking differences that are not visible from single-metric reporting.
+
+### B. Accuracy–Macro-F1 Landscape
+
+![Model Landscape](docs/figures/admissions/02_model_scatter.png)
+
+The scatter view reveals the performance frontier and the stability region of candidate models. It supports rational model selection beyond isolated best-case claims.
+
+---
+
+## Best Model Diagnostics
+
+### C. Confusion Matrix (Best Model)
+
+![Best Model Confusion Matrix](docs/figures/admissions/08_best_model_confusion_matrix.png)
+
+This matrix shows where errors are concentrated and which class boundaries remain difficult. It is used to prioritize future data augmentation and taxonomy refinement.
+
+### D. Per-Class F1
+
+![Per-Class F1](docs/figures/admissions/03_best_model_per_class_f1.png)
+
+Per-class F1 demonstrates class-wise robustness and helps verify that gains are not dominated only by majority classes.
+
+### E. Precision / Recall / F1 by Class
+
+![Per-Class PRF](docs/figures/admissions/04_best_model_prf_grouped.png)
+
+This grouped breakdown gives a complete reliability profile for each class, especially useful for high-cost misclassification categories.
+
+### F. Class Support vs Error Rate
+
+![Support and Error](docs/figures/admissions/05_best_model_support_error.png)
+
+This figure links data distribution to model behavior, showing where limited support still causes elevated error risk.
+
+---
+
+## Training Dynamics and Milestones
+
+### G. Training Curves of the Final Candidate
+
+![Training Curves](docs/figures/admissions/06_best_model_training_curves.png)
+
+The curves indicate stable optimization behavior and help validate that final metrics are not artifacts of unstable training.
+
+### H. Milestone Comparison Across Iterations
+
+![Milestone Comparison](docs/figures/admissions/07_milestone_comparison.png)
+
+This timeline-style comparison summarizes progress from earlier baselines to later optimized configurations.
+
+---
+
+## Mapping and Class Definition Notes
+
+The final deployment-oriented taxonomy uses 14 classes and maps fine-grained raw labels into operational groups. This design reflects both visual discriminability and disposal relevance.
+
+Current local model classes:
+
+- `brick_ceramic`
+- `e_waste`
+- `foam`
+- `glass`
+- `haz_battery`
+- `haz_device`
+- `haz_medicine`
+- `hygiene_contaminated`
+- `metal`
+- `organic_food`
+- `paper_family`
+- `plastic`
+- `small_hard_items`
+- `textile`
+
+At inference time, classes can also be mapped to coarse categories (`recyclable`, `hazardous`, `kitchen`, `other`) for user-facing guidance.
+
+---
+
+## Engineering Highlights for CS Admissions Context
+
+This project demonstrates practical software and ML engineering skills across the full stack:
+
+- **Data engineering:** custom mapping rules, dataset auditing, and class balancing decisions.
+- **Modeling:** architecture selection with explicit compute-performance trade-offs.
+- **MLOps mindset:** checkpoint organization, reproducible experiments, and result packaging.
+- **Deployment engineering:** lightweight API service, cloud-hosted demo, and large-weight delivery strategy.
+- **Human-centered design:** interactive correction loop and fallback path for uncertain predictions.
+
+The project is not a single notebook experiment. It is a multi-stage system with iterative design decisions, measurable trade-offs, and deployment constraints.
+
+---
+
+## Deployment Notes
+
+- The demo is accessible online through Hugging Face Spaces.
+- Large model artifacts are managed externally (for example, release assets) instead of bloating the source repository.
+- Backend supports environment-based configuration for model path, API keys, and runtime behavior.
+
+---
+
+## Reproducibility and Artifact Policy
+
+- Large datasets and full checkpoints are intentionally not committed as standard Git blobs.
+- Experiment outputs are organized under `checkpoints/`.
+- Training states should include model weights and optimizer/scheduler context for restartability.
+- Mapping and training settings are versioned in `configs/` for traceability.
+
+---
+
+## Limitations
+
+- Long-tail classes still show sensitivity to support size and visual noise.
+- Extreme occlusion and multi-object clutter remain difficult in pure single-image classification mode.
+- Cloud fallback quality depends on external model behavior and API availability.
+
+---
+
+## Future Work
+
+- Add stronger calibration for confidence-based fallback triggering.
+- Expand hard-negative mining and targeted augmentation for confusing class pairs.
+- Explore quantization-aware or distillation-based variants for lower-latency edge inference.
+- Improve temporal consistency for future video-stream scenarios.
+- Integrate richer monitoring for post-deployment drift analysis.
+
+---
+
+## Acknowledgments
+
+This project was developed as part of a student-led effort to bridge machine learning research and practical deployment. The work emphasizes reproducibility, iterative problem solving, and user-facing reliability.
+
+If you are reviewing this repository for academic purposes, the figures in `docs/figures/admissions/` provide a compact overview of experimental outcomes and engineering decisions.
