@@ -1,11 +1,11 @@
 """
-Baseline vs Optimized(Quantized) 对比评测脚本
+Baseline vs Optimized (Quantized) Comparison Benchmark Script
 
-功能:
-1. 加载已训练 checkpoint 作为 Baseline
-2. 生成 INT8 动态量化模型作为 Optimized
-3. 在同一数据划分、同一设备(CPU)下评测 Accuracy/F1/Latency/Model Size
-4. 保存结果到 checkpoints/<exp>/benchmark/
+Functionality:
+1. Load trained checkpoint as Baseline model
+2. Generate INT8 dynamic quantized model as Optimized version
+3. Evaluate Accuracy/F1/Latency/Model Size on the same data split and device (CPU)
+4. Save results to checkpoints/<exp>/benchmark/
 """
 
 import argparse
@@ -124,13 +124,13 @@ def _benchmark_latency_ms(model: torch.nn.Module, loader: DataLoader, device: to
 def main():
     parser = argparse.ArgumentParser(description="Benchmark baseline vs quantized model")
     parser.add_argument("--checkpoint", type=str, required=True, help="Path to baseline checkpoint .pth")
-    parser.add_argument("--data-root", type=str, default="data/raw", help="Dataset root")
-    parser.add_argument("--img-size", type=int, default=224, help="Image size")
+    parser.add_argument("--data-root", type=str, default="data/raw", help="Dataset root directory")
+    parser.add_argument("--img-size", type=int, default=224, help="Input image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=32, help="Batch size for metric evaluation")
-    parser.add_argument("--num-workers", type=int, default=4, help="Dataloader workers")
+    parser.add_argument("--num-workers", type=int, default=4, help="Number of dataloader worker processes")
     parser.add_argument("--val-split", type=float, default=0.2, help="Validation split ratio")
-    parser.add_argument("--max-latency-samples", type=int, default=120, help="Samples for latency benchmark")
-    parser.add_argument("--output-dir", type=str, default="", help="Output dir, default checkpoints/<exp>/benchmark")
+    parser.add_argument("--max-latency-samples", type=int, default=120, help="Maximum samples for latency benchmarking")
+    parser.add_argument("--output-dir", type=str, default="", help="Output directory (default: checkpoints/<exp>/benchmark)")
     args = parser.parse_args()
 
     checkpoint_path = Path(args.checkpoint)
@@ -218,7 +218,7 @@ def main():
         json.dump(summary, f, indent=2, ensure_ascii=False)
 
     markdown = [
-        "# Baseline vs Optimized (INT8)",
+        "# Baseline vs Optimized (INT8) Benchmark Report",
         "",
         f"- Experiment: {summary['experiment']}",
         f"- Device: {summary['device']}",
@@ -228,19 +228,19 @@ def main():
         f"| Baseline | {summary['baseline']['accuracy']:.4f} | {summary['baseline']['f1_macro']:.4f} | {summary['baseline']['latency_ms']:.2f} | {summary['baseline']['model_size_mb']:.2f} |",
         f"| Optimized INT8 | {summary['optimized_int8']['accuracy']:.4f} | {summary['optimized_int8']['f1_macro']:.4f} | {summary['optimized_int8']['latency_ms']:.2f} | {summary['optimized_int8']['model_size_mb']:.2f} |",
         "",
-        "## Delta",
+        "## Performance Delta",
         f"- Accuracy change: {summary['deltas']['accuracy_drop']:+.4f}",
         f"- F1 change: {summary['deltas']['f1_drop']:+.4f}",
-        f"- Speedup: {summary['deltas']['latency_speedup_x']:.2f}x" if summary['deltas']['latency_speedup_x'] else "- Speedup: N/A",
-        f"- Size reduction: {summary['deltas']['size_reduction_pct']:.2f}%" if summary['deltas']['size_reduction_pct'] is not None else "- Size reduction: N/A",
+        f"- Inference speedup: {summary['deltas']['latency_speedup_x']:.2f}x" if summary['deltas']['latency_speedup_x'] else "- Inference speedup: N/A",
+        f"- Model size reduction: {summary['deltas']['size_reduction_pct']:.2f}%" if summary['deltas']['size_reduction_pct'] is not None else "- Model size reduction: N/A",
     ]
 
     with open(output_dir / "comparison_report.md", "w", encoding="utf-8") as f:
         f.write("\n".join(markdown))
 
     print("=" * 60)
-    print("Benchmark completed")
-    print(json.dumps(summary, indent=2, ensure_ascii=False))
+    print("Benchmark completed successfully")
+    print(f"Results saved to: {output_dir}")
     print("=" * 60)
 
 
