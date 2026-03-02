@@ -1,34 +1,34 @@
-# ✅ TrashNet 6类数据集设置完成
+# ✅ TrashNet 6-Class Dataset Setup Complete
 
-## 📊 数据集信息
+## 📊 Dataset Information
 
-**TrashNet 标准数据集（学术基准）**
+**TrashNet Standard Dataset (Academic Baseline)**
 
-| 类别 | 图像数 | 占比 | 说明 |
-|------|--------|------|------|
-| paper | 594 | 23.5% | 纸张 |
-| glass | 501 | 19.8% | 玻璃 |
-| plastic | 482 | 19.1% | 塑料 |
-| metal | 410 | 16.2% | 金属 |
-| cardboard | 403 | 15.9% | 纸板 |
-| trash | 137 | 5.4% | 其他垃圾 |
-| **总计** | **2,527** | **100%** | |
+| Class | # Images | Ratio | Description |
+|------|----------|-------|-------------|
+| paper | 594 | 23.5% | Paper |
+| glass | 501 | 19.8% | Glass |
+| plastic | 482 | 19.1% | Plastic |
+| metal | 410 | 16.2% | Metal |
+| cardboard | 403 | 15.9% | Cardboard |
+| trash | 137 | 5.4% | Other waste |
+| **Total** | **2,527** | **100%** | |
 
-**数据质量：**
-- ✅ 标准学术基准（多篇论文使用）
-- ✅ 数据量充足（平均每类 421 张）
-- ✅ 不平衡比例 4.3:1（可接受范围）
-- ✅ 图像清晰，标注准确
+**Data quality:**
+- ✅ Standard academic benchmark (used in multiple papers)
+- ✅ Sufficient dataset volume (421 images per class on average)
+- ✅ Imbalance ratio 4.3:1 (acceptable range)
+- ✅ Clear images and reliable labels
 
 ---
 
-## 🎯 代码更新
+## 🎯 Code Updates
 
-### 已更新的文件
+### Updated Files
 
 1. **`src/data/dataset.py`**
-   - 更新为支持 6 类
-   - 类别：cardboard, glass, metal, paper, plastic, trash
+   - Updated to support 6 classes
+   - Classes: `cardboard`, `glass`, `metal`, `paper`, `plastic`, `trash`
 
 2. **`configs/baseline_resnet50.yaml`**
    - `num_classes: 4` → `num_classes: 6`
@@ -36,46 +36,46 @@
 3. **`configs/efficientnet_b3.yaml`**
    - `num_classes: 4` → `num_classes: 6`
 
-4. **`configs/trashnet_resnet50.yaml`**（新建）
-   - 专门针对 TrashNet 优化的配置
-   - 包含类别加权损失
-   - 针对 6 类的数据增强
+4. **`configs/trashnet_resnet50.yaml`** (new)
+   - Configuration optimized specifically for TrashNet
+   - Includes class-weighted loss
+   - Includes 6-class-focused augmentation
 
 5. **`src/train/trainer.py`**
-   - 新增类别加权损失支持
-   - 自动根据 class_counts 计算权重
+   - Added class-weighted loss support
+   - Automatically computes weights from `class_counts`
 
-6. **`scripts/train_trashnet.sh`**（新建）
-   - 一键启动训练脚本
+6. **`scripts/train_trashnet.sh`** (new)
+   - One-click training script
 
 ---
 
-## 🚀 开始训练
+## 🚀 Start Training
 
-### 方法 1：使用训练脚本（推荐）
+### Method 1: Use Training Script (Recommended)
 
 ```bash
 cd /public/home/zhw/cptac/projects/ecosort
 bash scripts/train_trashnet.sh
 ```
 
-### 方法 2：手动启动
+### Method 2: Run Manually
 
 ```bash
 cd /public/home/zhw/cptac/projects/ecosort
 
-# 激活环境
+# Activate environment
 export PYTHONPATH=/public/home/zhw/cptac/projects/ecosort:$PYTHONPATH
 conda activate ecosort
 
-# 使用 ResNet-50 训练
+# Train with ResNet-50
 python experiments/train_baseline.py \
     --config configs/trashnet_resnet50.yaml \
     --data-root data/raw \
     --exp-name trashnet_resnet50 \
     --no-wandb
 
-# 或使用 EfficientNet-B3（可能效果更好）
+# Or train with EfficientNet-B3 (may perform better)
 python experiments/train_baseline.py \
     --config configs/efficientnet_b3.yaml \
     --data-root data/raw \
@@ -85,115 +85,113 @@ python experiments/train_baseline.py \
 
 ---
 
-## 📊 预期性能（基于 SOTA 论文）
+## 📊 Expected Performance (Based on SOTA Papers)
 
-| 模型 | 准确率 | 训练时间（GPU） | 推荐度 |
-|------|--------|-----------------|--------|
-| ResNet-50 | ~93% | ~50-100 分钟 | ⭐⭐⭐⭐ |
-| EfficientNet-B3 | ~95% | ~60-120 分钟 | ⭐⭐⭐⭐⭐ |
-| ResNet-101 | ~94% | ~80-150 分钟 | ⭐⭐⭐⭐ |
-| Vision Transformer | ~96% | ~120-200 分钟 | ⭐⭐⭐ |
+| Model | Accuracy | Training Time (GPU) | Recommendation |
+|------|----------|----------------------|----------------|
+| ResNet-50 | ~93% | ~50–100 min | ⭐⭐⭐⭐ |
+| EfficientNet-B3 | ~95% | ~60–120 min | ⭐⭐⭐⭐⭐ |
+| ResNet-101 | ~94% | ~80–150 min | ⭐⭐⭐⭐ |
+| Vision Transformer | ~96% | ~120–200 min | ⭐⭐⭐ |
 
-**推荐配置：**
-- 快速训练：ResNet-50（1-2 小时）
-- 最佳性能：EfficientNet-B3（2 小时）
+**Suggested setup:**
+- Fast training: ResNet-50 (1–2 hours)
+- Best performance: EfficientNet-B3 (~2 hours)
 
 ---
 
-## 📈 训练监控
+## 📈 Training Monitoring
 
-### 查看训练日志
+### View training logs
 
 ```bash
-# 实时查看
+# Real-time monitoring
 tail -f logs/training_trashnet_*.log
 
-# 查看最后 50 行
+# Last 50 lines
 tail -50 logs/training_trashnet_*.log
 ```
 
-### 监控 GPU 使用
+### Monitor GPU usage
 
 ```bash
-# 实时监控
+# Real-time GPU monitoring
 watch -n 1 nvidia-smi
 
-# 查看 GPU 使用详情
+# Detailed GPU usage
 nvidia-smi --query-gpu=index,name,temperature,utilization.gpu,memory.used,memory.total --format=csv
 ```
 
-### 检查生成的文件
+### Check generated files
 
 ```bash
-# 查看检查点文件
+# List checkpoint files
 ls -lht checkpoints/trashnet_resnet50/
 
-# 查看训练摘要
+# View training summary
 cat checkpoints/trashnet_resnet50/training_summary.json
 ```
 
 ---
 
-## 🔍 类别加权说明
+## 🔍 Class Weighting Notes
 
-为了处理 trash 类样本较少（137 张）的问题，训练时会使用类别加权：
+To address the low sample count of the `trash` class (137 images), class weighting is used during training:
 
+```text
+Class weights (auto-computed):
+  paper:     1.00  (594 images)
+  glass:     1.19  (501 images)
+  plastic:   1.23  (482 images)
+  metal:     1.45  (410 images)
+  cardboard: 1.47  (403 images)
+  trash:     4.34  (137 images)  <-- highest weight
 ```
-类别权重（自动计算）:
-  paper:     1.00  (594 张)
-  glass:     1.19  (501 张)
-  plastic:   1.23  (482 张)
-  metal:     1.45  (410 张)
-  cardboard: 1.47  (403 张)
-  trash:     4.34  (137 张) ← 加权最高
-```
 
-这确保模型不会忽略少数类（trash）。
+This ensures the model does not ignore minority classes.
 
 ---
 
-## 📁 输出文件
+## 📁 Output Files
 
-训练完成后，会在 `checkpoints/trashnet_resnet50/` 生成：
+After training, the following files are generated in `checkpoints/trashnet_resnet50/`:
 
-```
+```text
 checkpoints/trashnet_resnet50/
-├── best_model.pth              # 最佳模型（完整状态）
-├── checkpoint_epoch_XX.pth     # 定期检查点
-├── training_summary.json       # 训练摘要
-├── loss_curve.png             # 损失曲线
-├── confusion_matrix.png       # 混淆矩阵
-└── class_accuracy.png         # 各类别准确率
+├── best_model.pth              # Best model (full state)
+├── checkpoint_epoch_XX.pth     # Periodic checkpoints
+├── training_summary.json       # Training summary
+├── loss_curve.png              # Loss curve
+├── confusion_matrix.png        # Confusion matrix
+└── class_accuracy.png          # Per-class accuracy
 ```
 
 ---
 
-## 🎓 真实场景识别
+## 🎓 Real-World Recognition Capability
 
-TrashNet 6 类非常适合真实场景：
+TrashNet 6-class setup is practical for real-world use:
 
-### 优点
-1. **细粒度分类**：区分不同材质（纸板、玻璃、金属等）
-2. **实用性强**：直接对应实际垃圾分类需求
-3. **数据真实**：真实拍摄，包含多种角度和光照
-4. **学术认可**：多篇论文使用，结果可对比
+### Advantages
+1. **Fine-grained material classes**: separates cardboard, glass, metal, etc.
+2. **High practical relevance**: directly aligned with common sorting scenarios.
+3. **Realistic imagery**: includes varied viewpoints and lighting.
+4. **Academic comparability**: benchmark used in many studies.
 
-### 识别能力
-训练完成后，模型可以识别：
-- ✅ 纸板箱（cardboard）
-- ✅ 玻璃瓶/杯（glass）
-- ✅ 金属罐（metal）
-- ✅ 纸张（paper）
-- ✅ 塑料瓶/袋（plastic）
-- ✅ 其他垃圾（trash）
+### What the model can recognize
+- ✅ Cardboard boxes (`cardboard`)
+- ✅ Glass bottles/cups (`glass`)
+- ✅ Metal cans (`metal`)
+- ✅ Paper (`paper`)
+- ✅ Plastic bottles/bags (`plastic`)
+- ✅ Other waste (`trash`)
 
-### 部署到真实场景
+### Example deployment inference
+
 ```python
-# 加载模型进行预测
 from torchvision import transforms
 from PIL import Image
 
-# 预处理
 transform = transforms.Compose([
     transforms.Resize(256),
     transforms.CenterCrop(224),
@@ -201,82 +199,79 @@ transform = transforms.Compose([
     transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
 ])
 
-# 加载图像
 image = Image.open("your_photo.jpg")
 input_tensor = transform(image).unsqueeze(0)
 
-# 预测
 with torch.no_grad():
     output = model(input_tensor)
     prediction = output.argmax(1).item()
 
 classes = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
-print(f"预测结果: {classes[prediction]}")
+print(f"Prediction: {classes[prediction]}")
 ```
 
 ---
 
-## 💡 下一步
+## 💡 Next Steps
 
-### 训练完成后
-1. **评估性能**
-   - 查看混淆矩阵
-   - 分析各类别准确率
-   - 对比 SOTA 基准
+### After training
+1. **Evaluate performance**
+   - Inspect confusion matrix
+   - Analyze per-class accuracy
+   - Compare against SOTA baselines
 
-2. **模型优化**（可选）
-   - 尝试不同模型（EfficientNet-B3）
-   - 调整数据增强
-   - 使用集成学习
+2. **Optional model optimization**
+   - Try alternative backbones (e.g., EfficientNet-B3)
+   - Tune augmentation policy
+   - Apply ensembling
 
-3. **部署测试**
-   - 使用真实照片/视频测试
-   - 部署到 Flask API
-   - 集成到 Android 应用
+3. **Deployment testing**
+   - Test on real photos/videos
+   - Deploy with Flask API
+   - Integrate into Android app
 
-### 性能优化
-如果需要更高准确率：
-- 使用 EfficientNet-B3（预期 95%+）
-- 增加数据增强
-- 尝试集成学习
-- 使用更大的模型（ResNet-101, ViT）
+### Performance upgrade options
+- Use EfficientNet-B3 (target 95%+)
+- Increase augmentation diversity
+- Try model ensembling
+- Use larger backbones (ResNet-101, ViT)
 
 ---
 
-## 📚 参考资源
+## 📚 Reference Resources
 
-### SOTA 论文
-- "Classification of TrashNet Dataset Based on Deep Learning Models" (2022)
-- "Multi-Class Image Benchmark for Automated Waste Segregation" (2024)
+### SOTA papers
+- *Classification of TrashNet Dataset Based on Deep Learning Models* (2022)
+- *Multi-Class Image Benchmark for Automated Waste Segregation* (2024)
 
-### TrashNet 数据集
-- 原始来源: Stanford & Toronto University
+### TrashNet dataset
+- Original source: Stanford & Toronto University
 - GitHub: https://github.com/garythung/TrashNet
 - Kaggle: https://www.kaggle.com/datasets/asdasdasasdas/garbage-classification
 
 ---
 
-## ✅ 检查清单
+## ✅ Checklist
 
-训练前：
-- [x] ✅ 数据已准备好（2,527 张，6 类）
-- [x] ✅ 代码已更新为 6 类
-- [x] ✅ 配置文件已更新
-- [x] ✅ 类别加权已配置
+Before training:
+- [x] ✅ Data is ready (2,527 images, 6 classes)
+- [x] ✅ Code updated for 6-class support
+- [x] ✅ Config files updated
+- [x] ✅ Class weighting configured
 
-训练中：
-- [ ] 监控训练日志
-- [ ] 检查 GPU 使用
-- [ ] 观察损失和准确率
+During training:
+- [ ] Monitor training logs
+- [ ] Monitor GPU usage
+- [ ] Track loss and accuracy trends
 
-训练后：
-- [ ] 评估性能指标
-- [ ] 分析混淆矩阵
-- [ ] 测试真实图像
-- [ ] 保存最佳模型
+After training:
+- [ ] Evaluate final metrics
+- [ ] Analyze confusion matrix
+- [ ] Test on real images
+- [ ] Save the best model
 
 ---
 
-*准备时间: 2026-02-15*
-*数据集: TrashNet 6类*
-*状态: ✅ 准备就绪，可以开始训练*
+*Prepared on: 2026-02-15*  
+*Dataset: TrashNet 6 classes*  
+*Status: ✅ Setup complete and ready for training*
