@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-预处理爬取后的分类数据集：
-1) 过滤无效/过小图片
-2) 全局 SHA1 去重
-3) 按类别分层切分 train/val/test
-4) 输出处理报告与类别统计
-"""
 
 import argparse
 import csv
