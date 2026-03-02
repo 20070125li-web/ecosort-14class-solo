@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-平衡数据集：通过下采样或数据增强实现类别平衡
+Balance Dataset: Achieve class balance through downsampling or data augmentation
 """
 
 import os
@@ -14,7 +14,7 @@ import torchvision.transforms as transforms
 
 
 def analyze_dataset(data_root):
-    """分析数据集分布"""
+    """Analyze dataset class distribution"""
     categories = ['recyclable', 'hazardous', 'kitchen', 'other']
     data_path = Path(data_root)
 
@@ -36,15 +36,15 @@ def analyze_dataset(data_root):
 
 
 def print_statistics(class_counts):
-    """打印数据集统计"""
+    """Print dataset statistics and distribution"""
     print("="*70)
-    print("📊 当前数据集统计")
+    print("📊 Current Dataset Statistics")
     print("="*70)
     print()
 
     total = sum(class_counts.values())
 
-    print("类别分布:")
+    print("Class Distribution:")
     print("-" * 70)
 
     for cat, count in sorted(class_counts.items(), key=lambda x: x[1], reverse=True):
@@ -53,45 +53,45 @@ def print_statistics(class_counts):
         print(f"  {cat:12s}: {count:5d} ({percentage:5.1f}%) {bar}")
 
     print("-" * 70)
-    print(f"  {'总计':12s}: {total:5d}")
+    print(f"  {'Total':12s}: {total:5d}")
     print()
 
-    # 检查平衡性
+    # Check balance metrics
     counts = list(class_counts.values())
     max_count = max(counts)
     min_count = min(counts)
 
     if min_count > 0:
         imbalance_ratio = max_count / min_count
-        print(f"不平衡比例: {imbalance_ratio:.1f}:1")
+        print(f"Imbalance Ratio: {imbalance_ratio:.1f}:1")
         if imbalance_ratio > 5:
-            print("⚠️  严重的类别不平衡！")
+            print("⚠️  Severe class imbalance detected!")
         elif imbalance_ratio > 2:
-            print("⚠️  中度不平衡")
+            print("⚠️  Moderate class imbalance")
         else:
-            print("✓ 类别平衡良好")
+            print("✓ Good class balance")
     else:
-        print("❌ 存在空类别")
+        print("❌ Empty classes detected")
     print()
 
     return total, max_count, min_count
 
 
 def downsample_majority_class(class_files, target_count, output_dir):
-    """对多数类进行下采样"""
-    print(f"下采样到 {target_count} 张/类...")
+    """Downsample majority classes to target count"""
+    print(f"Downsampling to {target_count} images per class...")
 
     for cat, files in class_files.items():
         cat_output_dir = Path(output_dir) / cat
         cat_output_dir.mkdir(parents=True, exist_ok=True)
 
         if len(files) <= target_count:
-            # 不需要下采样，全部复制
+            # No downsampling needed - copy all files
             for img_path in files:
                 shutil.copy2(img_path, cat_output_dir / img_path.name)
-            print(f"  {cat}: {len(files)} 张 (无需下采样)")
+            print(f"  {cat}: {len(files)} images (no downsampling needed)")
         else:
-            # 随机采样
+            # Random sampling without replacement
             np.random.seed(42)
             sampled_indices = np.random.choice(len(files), target_count, replace=False)
 
@@ -99,14 +99,14 @@ def downsample_majority_class(class_files, target_count, output_dir):
                 img_path = files[idx]
                 shutil.copy2(img_path, cat_output_dir / img_path.name)
 
-            print(f"  {cat}: {len(files)} -> {target_count} 张 (下采样)")
+            print(f"  {cat}: {len(files)} -> {target_count} images (downsampled)")
 
 
 def oversample_minority_classes(class_files, target_count, output_dir, augment=True):
-    """对少数类进行上采样（数据增强）"""
-    print(f"上采样到 {target_count} 张/类...")
+    """Oversample minority classes using data augmentation"""
+    print(f"Oversampling to {target_count} images per class...")
 
-    # 数据增强变换
+    # Data augmentation transformations
     augmentation_transforms = [
         transforms.Compose([
             transforms.RandomHorizontalFlip(p=1.0),
@@ -134,23 +134,23 @@ def oversample_minority_classes(class_files, target_count, output_dir, augment=T
         cat_output_dir.mkdir(parents=True, exist_ok=True)
 
         if len(files) >= target_count:
-            # 不需要上采样，随机选择
+            # No oversampling needed - random selection
             np.random.seed(42)
             sampled_indices = np.random.choice(len(files), target_count, replace=False)
             for idx in sampled_indices:
                 img_path = files[idx]
                 shutil.copy2(img_path, cat_output_dir / img_path.name)
-            print(f"  {cat}: {len(files)} -> {target_count} 张 (随机选择)")
+            print(f"  {cat}: {len(files)} -> {target_count} images (random selection)")
         else:
-            # 复制所有原始图像
+            # Copy all original images first
             for img_path in files:
                 shutil.copy2(img_path, cat_output_dir / img_path.name)
 
             needed = target_count - len(files)
-            print(f"  {cat}: {len(files)} -> {target_count} 张 (需要生成 {needed} 张增强图像)")
+            print(f"  {cat}: {len(files)} -> {target_count} images (need {needed} augmented images)")
 
             if augment and needed > 0:
-                # 通过数据增强生成额外图像
+                # Generate additional images with augmentation
                 aug_idx = 0
                 while aug_idx < needed:
                     for img_path in files:
@@ -159,14 +159,14 @@ def oversample_minority_classes(class_files, target_count, output_dir, augment=T
 
                         img = Image.open(img_path).convert('RGB')
 
-                        # 随机选择增强方法
+                        # Randomly select augmentation method
                         transform = np.random.choice(augmentation_transforms)
                         img_tensor = transform(img)
 
-                        # 转回 PIL Image
+                        # Convert back to PIL Image
                         img_aug = to_pil(img_tensor)
 
-                        # 保存
+                        # Save augmented image
                         aug_name = f"aug_{aug_idx:04d}_{img_path.name}"
                         save_path = cat_output_dir / aug_name
                         img_aug.save(save_path)
@@ -175,42 +175,42 @@ def oversample_minority_classes(class_files, target_count, output_dir, augment=T
 
 
 def balance_to_target(data_root, output_dir, target_count, method='oversample'):
-    """平衡数据集到目标数量"""
+    """Balance dataset to target count per class"""
     print(f"╔════════════════════════════════════════════════════════════╗")
-    print(f"║     🎯 数据集平衡工具 ({method})                            ║")
+    print(f"║     🎯 Dataset Balancing Tool ({method})                    ║")
     print(f"╚════════════════════════════════════════════════════════════╝")
     print()
 
-    # 分析数据集
+    # Analyze dataset
     class_counts, class_files = analyze_dataset(data_root)
 
-    # 打印统计
+    # Print statistics
     total, max_count, min_count = print_statistics(class_counts)
 
-    print(f"目标: 每类 {target_count} 张")
-    print(f"方法: {method}")
+    print(f"Target: {target_count} images per class")
+    print(f"Method: {method}")
     print()
 
-    # 检查是否有空类别
+    # Check for empty classes
     if min_count == 0:
-        print("❌ 错误: 存在空类别，无法平衡")
-        print("请先补充数据或使用其他数据集")
+        print("❌ Error: Empty classes detected - cannot balance dataset")
+        print("Please add data to empty classes or use a different dataset")
         return
 
-    # 检查目标数量是否合理
+    # Validate target count
     if method == 'oversample' and target_count > max_count * 5:
-        print(f"⚠️  警告: 目标数量 {target_count} 远大于多数类 {max_count}")
-        print(f"     这会导致大量重复图像，可能影响模型性能")
-        response = input("是否继续？(y/n): ")
+        print(f"⚠️  Warning: Target count ({target_count}) is much higher than majority class ({max_count})")
+        print(f"     This will create many duplicate/augmented images which may hurt model performance")
+        response = input("Continue anyway? (y/n): ")
         if response.lower() != 'y':
             return
 
-    # 创建输出目录
+    # Create output directory
     output_path = Path(output_dir)
     if output_path.exists():
-        print(f"⚠️  输出目录已存在: {output_dir}")
+        print(f"⚠️  Output directory exists: {output_dir}")
         backup_dir = Path(f"{output_dir}_backup")
-        print(f"   备份到: {backup_dir}")
+        print(f"   Backing up to: {backup_dir}")
         if backup_dir.exists():
             shutil.rmtree(backup_dir)
         shutil.copytree(output_dir, backup_dir)
@@ -218,9 +218,9 @@ def balance_to_target(data_root, output_dir, target_count, method='oversample'):
 
     output_path.mkdir(parents=True, exist_ok=True)
 
-    # 执行平衡
+    # Execute balancing
     print("="*70)
-    print("🔄 开始平衡...")
+    print("🔄 Starting dataset balancing...")
     print("="*70)
     print()
 
@@ -229,25 +229,25 @@ def balance_to_target(data_root, output_dir, target_count, method='oversample'):
     elif method == 'oversample':
         oversample_minority_classes(class_files, target_count, output_dir, augment=True)
     else:
-        print(f"❌ 未知方法: {method}")
+        print(f"❌ Unknown method: {method}")
         return
 
     print()
     print("="*70)
-    print("✅ 平衡完成！")
+    print("✅ Dataset balancing completed!")
     print("="*70)
     print()
 
-    # 验证结果
-    print("验证结果:")
+    # Verify results
+    print("Verification Results:")
     class_counts_after, _ = analyze_dataset(output_dir)
     print_statistics(class_counts_after)
 
-    print(f"✓ 平衡后的数据集已保存到: {output_dir}")
+    print(f"✓ Balanced dataset saved to: {output_dir}")
 
 
 def auto_balance(data_root, output_dir, max_imbalance_ratio=1.5):
-    """自动平衡：根据当前分布选择最佳方法"""
+    """Auto-balance: Select optimal strategy based on current distribution"""
     class_counts, _ = analyze_dataset(data_root)
 
     counts = list(class_counts.values())
@@ -255,23 +255,22 @@ def auto_balance(data_root, output_dir, max_imbalance_ratio=1.5):
     min_count = min(counts)
 
     if min_count == 0:
-        print("❌ 存在空类别，无法自动平衡")
-        print("请先补充数据")
+        print("❌ Empty classes detected - cannot auto-balance")
+        print("Please add data to empty classes first")
         return
 
-    # 根据不平衡比例选择策略
+    # Calculate imbalance ratio
     imbalance_ratio = max_count / min_count
 
     if imbalance_ratio <= max_imbalance_ratio:
-        print("✓ 数据集已经足够平衡，无需处理")
+        print("✓ Dataset is already sufficiently balanced - no action needed")
         return
 
-    # 选择目标数量（使用中位数）
+    # Select target count (using median)
     sorted_counts = sorted(counts)
     median_count = sorted_counts[len(sorted_counts) // 2]
 
-    # 如果多数类远大于少数类，考虑下采样
-    # 如果少数类太少，使用上采样
+    # Choose strategy based on distribution
     if max_count > median_count * 3:
         target_count = median_count
         method = 'downsample'
@@ -279,26 +278,27 @@ def auto_balance(data_root, output_dir, max_imbalance_ratio=1.5):
         target_count = median_count
         method = 'oversample'
 
-    print(f"自动决策:")
-    print(f"  不平衡比例: {imbalance_ratio:.1f}:1")
-    print(f"  目标数量: {target_count}")
-    print(f"  使用方法: {method}")
+    print(f"Auto-Decision:")
+    print(f"  Imbalance Ratio: {imbalance_ratio:.1f}:1")
+    print(f"  Target Count: {target_count}")
+    print(f"  Selected Method: {method}")
     print()
 
     balance_to_target(data_root, output_dir, target_count, method)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="平衡垃圾分类数据集")
+    parser = argparse.ArgumentParser(description="Trash Classification Dataset Balancer")
     parser.add_argument("--data-root", type=str, default="data/raw",
-                        help="原始数据目录")
+                        help="Root directory of original dataset")
     parser.add_argument("--output", type=str, default="data/balanced",
-                        help="输出目录")
-    parser.add_argument("--target", type=int, help="每类目标数量")
+                        help="Output directory for balanced dataset")
+    parser.add_argument("--target", type=int,
+                        help="Target number of images per class")
     parser.add_argument("--method", type=str, choices=['downsample', 'oversample'],
-                        help="平衡方法: downsample (下采样) 或 oversample (上采样+增强)")
+                        help="Balancing method: downsample (majority) or oversample (minority with augmentation)")
     parser.add_argument("--auto", action="store_true",
-                        help="自动选择最佳策略")
+                        help="Automatically select optimal balancing strategy")
 
     args = parser.parse_args()
 
@@ -306,16 +306,16 @@ def main():
         auto_balance(args.data_root, args.output)
     elif args.target:
         if not args.method:
-            # 默认使用上采样
+            # Default to oversampling
             args.method = 'oversample'
         balance_to_target(args.data_root, args.output, args.target, args.method)
     else:
-        print("请指定 --target N (每类目标数量) 或使用 --auto")
+        print("Please specify either --target N (target images per class) or use --auto")
         print()
-        print("示例:")
-        print("  下采样到每类 500 张: --target 500 --method downsample")
-        print("  上采样到每类 1000 张: --target 1000 --method oversample")
-        print("  自动选择: --auto")
+        print("Examples:")
+        print("  Downsample to 500 images per class: --target 500 --method downsample")
+        print("  Oversample to 1000 images per class: --target 1000 --method oversample")
+        print("  Auto-balance: --auto")
 
 
 if __name__ == "__main__":
