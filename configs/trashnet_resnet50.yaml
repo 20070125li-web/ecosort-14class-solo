@@ -1,7 +1,7 @@
-# EcoSort TrashNet 6类配置 - ResNet50
-# 使用类别加权处理轻微不平衡
+# EcoSort TrashNet 6-Class Configuration - ResNet50
+# Use class weighting to handle slight data imbalance
 
-# 模型配置
+# Model Configuration
 model:
   type: "resnet"
   backbone: "resnet50"
@@ -10,21 +10,21 @@ model:
   dropout: 0.3
   use_attention: false
 
-# 数据配置
+# Data Configuration
 data:
   root_dir: "data/raw"
-  img_size: 224  # ResNet 标准输入
+  img_size: 224  # ResNet standard input size
   batch_size: 32
   num_workers: 4
   val_split: 0.2
   shuffle: true
 
-  # TrashNet 6 类的样本分布（用于类别加权）
+  # TrashNet 6-class sample distribution (for class weighting)
   # paper: 594, glass: 501, plastic: 482, metal: 410, cardboard: 403, trash: 137
   class_counts: [594, 501, 482, 410, 403, 137]
-  use_class_weights: true  # 启用类别加权
+  use_class_weights: true  # Enable class weighting
 
-# 训练配置
+# Training Configuration
 training:
   epochs: 50
   learning_rate: 0.001
@@ -35,31 +35,31 @@ training:
   early_stopping_patience: 10
   gradient_clip_val: 1.0
 
-# 损失函数
+# Loss Function
 loss:
   type: "cross_entropy"
   label_smoothing: 0.1
-  # 类别权重将在训练时根据 class_counts 自动计算
+  # Class weights will be automatically calculated from class_counts during training
 
-# 数据增强（针对 TrashNet 优化）
+# Data Augmentation (optimized for TrashNet)
 augmentation:
   horizontal_flip_prob: 0.5
-  vertical_flip_prob: 0.0  # 垃圾通常不需要垂直翻转
+  vertical_flip_prob: 0.0  # Vertical flip is unnecessary for trash images
   rotation_degrees: 15
   color_jitter:
     brightness: 0.2
     contrast: 0.2
     saturation: 0.2
   random_crop: true
-  scale_range: [0.8, 1.0]  # 随机裁剪比例
+  scale_range: [0.8, 1.0]  # Random crop scale range
 
-# 检查点配置
+# Checkpoint Configuration
 checkpoint:
   dir: "checkpoints"
   save_interval: 10
   save_best_only: true
 
-# WandB 配置
+# WandB Configuration
 wandb:
   project: "ecosort-trashnet"
   entity: null
