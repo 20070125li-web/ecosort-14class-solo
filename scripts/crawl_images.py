@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-EcoSort 图片爬取脚本（Bing）
+EcoSort Image Crawling Script (Bing)
 
-功能：
-- 按类别关键词批量抓图
-- 最低分辨率过滤
-- 基于文件哈希去重（跨关键词/跨批次）
-- 输出 metadata 便于追溯
+Features:
+- Batch image crawling by category keywords
+- Minimum resolution filtering
+- File hash-based deduplication (cross-keyword/cross-batch)
+- Metadata output for traceability
 
-用法：
+Usage:
 python scripts/crawl_images.py \
   --config configs/crawl_keywords.yaml \
   --output-root data/raw \
@@ -32,6 +32,7 @@ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 
 def sha1_file(path: Path) -> str:
+    """Calculate SHA1 hash of file content for deduplication"""
     h = hashlib.sha1()
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
@@ -40,6 +41,7 @@ def sha1_file(path: Path) -> str:
 
 
 def is_valid_image(path: Path, min_w: int, min_h: int) -> bool:
+    """Validate image file format and minimum resolution"""
     if path.suffix.lower() not in IMAGE_EXTS:
         return False
     try:
@@ -51,6 +53,7 @@ def is_valid_image(path: Path, min_w: int, min_h: int) -> bool:
 
 
 def build_existing_hashes(output_root: Path) -> Dict[str, str]:
+    """Build hash map of existing images to detect duplicates"""
     hashes = {}
     if not output_root.exists():
         return hashes
@@ -64,14 +67,16 @@ def build_existing_hashes(output_root: Path) -> Dict[str, str]:
 
 
 def load_config(path: Path) -> Dict:
+    """Load crawling configuration from YAML file"""
     with open(path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     if "classes" not in cfg or not isinstance(cfg["classes"], dict):
-        raise ValueError("配置文件必须包含 classes 字段")
+        raise ValueError("Config file must contain 'classes' field")
     return cfg
 
 
 def crawl_one_keyword(keyword: str, max_num: int, workers: int, out_dir: Path):
+    """Crawl images for single keyword using BingImageCrawler"""
     crawler = BingImageCrawler(
         feeder_threads=1,
         parser_threads=2,
@@ -82,15 +87,23 @@ def crawl_one_keyword(keyword: str, max_num: int, workers: int, out_dir: Path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="EcoSort image crawler")
-    parser.add_argument("--config", type=str, default="configs/crawl_keywords.yaml")
-    parser.add_argument("--output-root", type=str, default="data/raw")
-    parser.add_argument("--per-keyword", type=int, default=120, help="每个关键词抓取上限")
-    parser.add_argument("--min-width", type=int, default=256)
-    parser.add_argument("--min-height", type=int, default=256)
-    parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--sleep", type=float, default=1.0, help="关键词之间等待秒数")
-    parser.add_argument("--dry-run", action="store_true")
+    parser = argparse.ArgumentParser(description="EcoSort Image Crawler (Bing)")
+    parser.add_argument("--config", type=str, default="configs/crawl_keywords.yaml",
+                        help="Path to YAML config file with crawl keywords")
+    parser.add_argument("--output-root", type=str, default="data/raw",
+                        help="Root directory for crawled images")
+    parser.add_argument("--per-keyword", type=int, default=120,
+                        help="Maximum images to crawl per keyword")
+    parser.add_argument("--min-width", type=int, default=256,
+                        help="Minimum image width (pixels)")
+    parser.add_argument("--min-height", type=int, default=256,
+                        help="Minimum image height (pixels)")
+    parser.add_argument("--workers", type=int, default=4,
+                        help="Number of download worker threads")
+    parser.add_argument("--sleep", type=float, default=1.0,
+                        help="Sleep seconds between keyword crawls")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Simulate crawl without downloading files")
     args = parser.parse_args()
 
     config = load_config(Path(args.config))
@@ -201,9 +214,9 @@ def main():
         )
     print("===================================")
     if args.dry_run:
-        print("DRY-RUN 完成（未实际下载）")
+        print("DRY-RUN completed (no files downloaded)")
     else:
-        print(f"已写入元数据: {metadata_path}")
+        print(f"Metadata written to: {metadata_path}")
 
 
 if __name__ == "__main__":
