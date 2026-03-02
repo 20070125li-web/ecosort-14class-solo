@@ -74,4 +74,3 @@ Since Model v1.0 isn't perfect, I designed a fail-safe interactive UI:
 * **Train Model v2.0:** Utilize the edge-cases collected from the web app's reporting system.
 
 ---
-*Developed by Yuzhen Tong (Students-CS)*
