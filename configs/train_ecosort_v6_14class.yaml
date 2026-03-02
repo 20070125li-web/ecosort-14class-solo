@@ -1,67 +1,67 @@
-# EcoSort V6 14类训练配置
-# 完全基于 V5 checkpoint 配置 (ecosort_v5_14class_effb3_letterbox224_20260227_023357)
+# EcoSort V6 14-Class Training Configuration
+# Fully based on V5 checkpoint configuration (ecosort_v5_14class_effb3_letterbox224_20260227_023357)
 #
-# V6 vs V5 变化（仍然是14类）：
-# - haz_chemical → plastic (合并，减少互混淆)
-# - complex_misc → 拆分为 small_hard_items, foam, brick_ceramic (减少视觉混淆)
-# - ceramic → brick_ceramic (与brick合并)
-# 净变化：14 - 1 + 2 - 1 = 14类
+# V6 vs V5 Changes (still 14 classes):
+# - haz_chemical → plastic (merged to reduce mutual confusion)
+# - complex_misc → split into small_hard_items, foam, brick_ceramic (reduce visual confusion)
+# - ceramic → brick_ceramic (merged with brick)
+# Net change: 14 - 1 + 2 - 1 = 14 classes
 
 experiment_name: ecosort_v6_14class_effb3_20260301
-seed: 20260301  # 随机种子（V5使用20260227）
+seed: 20260301  # Random seed (V5 used 20260227)
 
-# 模型配置（与V5完全一致）
+# Model Configuration (identical to V5)
 model:
   type: efficientnet
   backbone: efficientnet-b3
-  num_classes: 14          # V6 仍然是14类
+  num_classes: 14          # V6 still uses 14 classes
   pretrained: true
   dropout: 0.3
 
-# 数据配置（与V5完全一致）
+# Data Configuration (identical to V5)
 data:
   root_dir: data/proc/ecosort_v6_15class
-  img_size: 224            # Letterbox 224
+  img_size: 224            # Letterbox resize to 224x224
   batch_size: 24
   val_split: 0.2
   shuffle: true
   num_workers: 4
 
-  # 类别平衡（与V5一致：关闭类别权重，开启加权采样）
+  # Class balancing (same as V5: disable class weights, enable weighted sampling)
   use_class_weights: false
   normalize_class_weights: false
   use_weighted_sampler: true
 
-# 训练配置（与V5完全一致）
+# Training Configuration (identical to V5)
 training:
-  epochs: 30                # V5使用30 epochs
+  epochs: 30                # V5 used 30 epochs
   learning_rate: 0.0004
   optimizer: adamw
   weight_decay: 0.0001
   scheduler: cosine
   gradient_clip_val: 1.0
-  early_stopping_patience: 7 # V5使用7
+  early_stopping_patience: 7 # V5 used 7
   monitor_metric: val_f1
   monitor_mode: max
-  use_amp: true             # V5使用混合精度
+  use_amp: true             # V5 used mixed precision training
 
-# 损失函数（与V5完全一致）
+# Loss Function (identical to V5)
 loss:
   type: cross_entropy
   label_smoothing: 0.03
 
-# 数据增强（与V5一致）
+# Data Augmentation (identical to V5)
 augmentation:
   strong_aug: true
   random_erasing_prob: 0.12
 
-# Checkpoint（与V5一致）
+# Checkpoint (identical to V5)
 checkpoint:
   dir: checkpoints
   save_best_only: true
   save_interval: 5
 
-# WandB（更新为V6标签）
+# WandB Configuration (updated with V6 tags)
 wandb:
   project: ecosort-daily-life
   entity: null
@@ -71,9 +71,9 @@ wandb:
     - efficientnet-b3
     - v5-config-replica
   notes: |
-    V6 14类 - 完全复制V5配置：
-    - haz_chemical → plastic (合并)
-    - complex_misc → 拆分为 small_hard_items, foam, brick_ceramic
-    - 训练参数与 ecosort_v5_14class_effb3_letterbox224 完全一致
-    - 基于 9018 张原始图片
-    - 随机种子: 20260301 (V5: 20260227)
+    V6 14-class - Full replication of V5 configuration:
+    - haz_chemical → plastic (merged)
+    - complex_misc → split into small_hard_items, foam, brick_ceramic
+    - Training parameters identical to ecosort_v5_14class_effb3_letterbox224
+    - Based on 9018 original images
+    - Random seed: 20260301 (V5: 20260227)
