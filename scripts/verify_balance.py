@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-验证平衡后的数据集
+Validate Balanced Dataset
+Check dataset balance, completeness and quality metrics
 """
 
 import os
@@ -9,28 +10,28 @@ import argparse
 
 
 def verify_dataset(data_root):
-    """验证数据集平衡性和质量"""
+    """Validate dataset balance and quality metrics"""
     categories = ['recyclable', 'hazardous', 'kitchen', 'other']
     data_path = Path(data_root)
 
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║     ✓ 数据集验证工具                                        ║")
+    print("║     ✓ Dataset Validation Tool                              ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print()
-    print(f"数据目录: {data_root}")
+    print(f"Data Directory: {data_root}")
     print()
 
-    # 检查目录是否存在
+    # Check if root directory exists
     if not data_path.exists():
-        print(f"❌ 数据目录不存在: {data_root}")
+        print(f"❌ Data directory does not exist: {data_root}")
         return False
 
-    # 统计每个类别的图像数量
+    # Count images per category
     class_stats = {}
     total = 0
 
     print("="*70)
-    print("📊 类别分布")
+    print("📊 Class Distribution")
     print("="*70)
     print()
 
@@ -38,11 +39,11 @@ def verify_dataset(data_root):
         cat_path = data_path / cat
 
         if not cat_path.exists():
-            print(f"❌ 缺失类别目录: {cat}")
+            print(f"❌ Missing category directory: {cat}")
             class_stats[cat] = 0
             continue
 
-        # 统计图像文件
+        # Count image files (support common formats)
         image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp'}
         files = [f for f in cat_path.glob("*") if f.suffix.lower() in image_extensions]
 
@@ -57,12 +58,12 @@ def verify_dataset(data_root):
         print(f"{status} {cat:12s}: {count:5d} ({percentage:5.1f}%) {bar}")
 
     print()
-    print(f"总计: {total} 张图像")
+    print(f"Total Images: {total}")
     print()
 
-    # 检查平衡性
+    # Check balance metrics
     print("="*70)
-    print("⚖️  平衡性检查")
+    print("⚖️  Balance Check")
     print("="*70)
     print()
 
@@ -71,128 +72,128 @@ def verify_dataset(data_root):
     min_count = min(counts)
 
     if min_count == 0:
-        print("❌ 结果: 失败")
-        print("   原因: 存在空类别")
+        print("❌ Result: FAILED")
+        print("   Reason: Empty categories detected")
         print()
-        print("建议:")
+        print("Recommendations:")
         empty_classes = [cat for cat, count in class_stats.items() if count == 0]
         for cat in empty_classes:
-            print(f"   - 为 '{cat}' 类别补充至少 400-500 张图像")
+            print(f"   - Add at least 400-500 images to '{cat}' category")
         return False
 
     imbalance_ratio = max_count / min_count
-    print(f"不平衡比例: {imbalance_ratio:.1f}:1")
+    print(f"Imbalance Ratio: {imbalance_ratio:.1f}:1")
     print()
 
     if imbalance_ratio <= 1.2:
-        print("✓ 结果: 优秀")
-        print("   类别非常平衡，适合训练")
-        balance_status = "优秀"
+        print("✓ Result: EXCELLENT")
+        print("   Classes are well-balanced - ideal for training")
+        balance_status = "EXCELLENT"
     elif imbalance_ratio <= 1.5:
-        print("✓ 结果: 良好")
-        print("   类别平衡良好，可以开始训练")
-        balance_status = "良好"
+        print("✓ Result: GOOD")
+        print("   Classes are reasonably balanced - ready for training")
+        balance_status = "GOOD"
     elif imbalance_ratio <= 2.0:
-        print("⚠️  结果: 一般")
-        print("   轻度不平衡，建议使用类别加权损失")
-        balance_status = "一般"
+        print("⚠️  Result: FAIR")
+        print("   Mild imbalance detected - recommend class-weighted loss")
+        balance_status = "FAIR"
     elif imbalance_ratio <= 3.0:
-        print("⚠️  结果: 较差")
-        print("   中度不平衡，强烈建议进行数据平衡")
-        balance_status = "较差"
+        print("⚠️  Result: POOR")
+        print("   Moderate imbalance - strong recommendation to balance data")
+        balance_status = "POOR"
     else:
-        print("❌ 结果: 很差")
-        print("   严重的类别不平衡，必须进行数据平衡")
-        balance_status = "很差"
+        print("❌ Result: VERY POOR")
+        print("   Severe class imbalance - data balancing required")
+        balance_status = "VERY POOR"
 
     print()
 
-    # 检查数据量
+    # Check data volume adequacy
     print("="*70)
-    print("📏 数据量检查")
+    print("📏 Data Volume Check")
     print("="*70)
     print()
 
     avg_count = total / 4
 
-    print(f"平均每类: {avg_count:.0f} 张")
+    print(f"Average per class: {avg_count:.0f} images")
     print()
 
     if avg_count >= 1000:
-        print("✓ 数据量: 充足")
-        print("   每类样本数 > 1000，适合深度学习训练")
-        data_status = "充足"
+        print("✓ Data Volume: SUFFICIENT")
+        print("   >1000 samples per class - ideal for deep learning training")
+        data_status = "SUFFICIENT"
     elif avg_count >= 500:
-        print("✓ 数据量: 良好")
-        print("   每类样本数 > 500，可以使用迁移学习")
-        data_status = "良好"
+        print("✓ Data Volume: GOOD")
+        print("   >500 samples per class - suitable for transfer learning")
+        data_status = "GOOD"
     elif avg_count >= 300:
-        print("⚠️  数据量: 一般")
-        print("   每类样本数 > 300，建议使用数据增强")
-        data_status = "一般"
+        print("⚠️  Data Volume: FAIR")
+        print("   >300 samples per class - recommend data augmentation")
+        data_status = "FAIR"
     elif avg_count >= 100:
-        print("⚠️  数据量: 较少")
-        print("   每类样本数 < 300，模型性能可能受限")
-        data_status = "较少"
+        print("⚠️  Data Volume: LOW")
+        print("   <300 samples per class - model performance may be limited")
+        data_status = "LOW"
     else:
-        print("❌ 数据量: 不足")
-        print("   每类样本数 < 100，建议收集更多数据")
-        data_status = "不足"
+        print("❌ Data Volume: INSUFFICIENT")
+        print("   <100 samples per class - recommend collecting more data")
+        data_status = "INSUFFICIENT"
 
     print()
 
-    # 综合评估
+    # Comprehensive assessment
     print("="*70)
-    print("🎯 综合评估")
+    print("🎯 Comprehensive Assessment")
     print("="*70)
     print()
 
-    if balance_status in ["优秀", "良好"] and data_status in ["充足", "良好"]:
-        print("✅ 数据集质量: 优秀")
+    if balance_status in ["EXCELLENT", "GOOD"] and data_status in ["SUFFICIENT", "GOOD"]:
+        print("✅ Dataset Quality: EXCELLENT")
         print()
-        print("可以开始训练！")
+        print("Ready for training!")
         print()
-        print("推荐配置:")
+        print("Recommended Training Command:")
         print(f"  python experiments/train_baseline.py \\")
         print(f"      --config configs/baseline_resnet50.yaml \\")
         print(f"      --data-root {data_root} \\")
         print(f"      --exp-name balanced_training")
         return True
-    elif balance_status in ["一般", "较差", "很差"] and data_status in ["一般", "较少", "不足"]:
-        print("⚠️  数据集质量: 需要改进")
+    elif balance_status in ["FAIR", "POOR", "VERY POOR"] and data_status in ["FAIR", "LOW", "INSUFFICIENT"]:
+        print("⚠️  Dataset Quality: NEEDS IMPROVEMENT")
         print()
-        print("建议:")
-        if balance_status in ["较差", "很差"]:
-            print("  1. 使用数据平衡工具:")
+        print("Recommendations:")
+        if balance_status in ["POOR", "VERY POOR"]:
+            print("  1. Run data balancing tool:")
             print("     python scripts/balance_dataset.py --auto")
-        if data_status in ["较少", "不足"]:
-            print("  2. 下载更多数据:")
+        if data_status in ["LOW", "INSUFFICIENT"]:
+            print("  2. Download additional data:")
             print("     bash scripts/collect_and_balance_data.sh")
         return False
-    elif balance_status in ["一般", "较差", "很差"]:
-        print("⚠️  主要问题: 类别不平衡")
+    elif balance_status in ["FAIR", "POOR", "VERY POOR"]:
+        print("⚠️  Primary Issue: Class Imbalance")
         print()
-        print("建议:")
+        print("Recommendation:")
         print("  python scripts/balance_dataset.py \\")
-        print("      --data-root {} \\ --auto".format(data_root))
+        print(f"      --data-root {data_root} --auto")
         return False
-    elif data_status in ["一般", "较少", "不足"]:
-        print("⚠️  主要问题: 数据量不足")
+    elif data_status in ["FAIR", "LOW", "INSUFFICIENT"]:
+        print("⚠️  Primary Issue: Insufficient Data Volume")
         print()
-        print("建议:")
+        print("Recommendation:")
         print("  bash scripts/collect_and_balance_data.sh")
         return False
     else:
-        print("✅ 数据集质量: 可接受")
+        print("✅ Dataset Quality: ACCEPTABLE")
         print()
-        print("可以开始训练，但建议使用类别加权损失")
+        print("Training can proceed - recommend using class-weighted loss function")
         return True
 
 
 def main():
-    parser = argparse.ArgumentParser(description="验证平衡后的数据集")
+    parser = argparse.ArgumentParser(description="Validate balanced dataset quality and balance")
     parser.add_argument("--data-root", type=str, default="data/raw",
-                        help="数据目录")
+                        help="Root directory of dataset")
 
     args = parser.parse_args()
 
