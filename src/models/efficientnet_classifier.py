@@ -1,6 +1,6 @@
 """
 EcoSort EfficientNet Classifier
-基于EfficientNet的高效垃圾分类模型
+Efficient Waste Classification Model based on EfficientNet
 """
 
 import torch
@@ -10,10 +10,10 @@ from typing import Optional
 
 
 class EfficientNetClassifier(nn.Module):
-    """EfficientNet 垃圾分类器
+    """EfficientNet Waste Classifier
 
-    支持的 backbone:
-    - efficientnet-b0 到 efficientnet-b7
+    Supported backbones:
+    - efficientnet-b0 to efficientnet-b7
     """
 
     def __init__(
@@ -26,18 +26,18 @@ class EfficientNetClassifier(nn.Module):
     ):
         """
         Args:
-            num_classes: 分类类别数 (4类垃圾)
-            backbone: EfficientNet 变体
-            pretrained: 是否使用 ImageNet 预训练权重
-            dropout: Dropout 概率
-            drop_connect_rate: DropConnect 概率
+            num_classes: Number of classification categories (e.g., 4 types of waste)
+            backbone: EfficientNet variant
+            pretrained: Whether to use ImageNet pre-trained weights
+            dropout: Dropout probability
+            drop_connect_rate: DropConnect probability
         """
         super(EfficientNetClassifier, self).__init__()
 
         self.num_classes = num_classes
         self.backbone_name = backbone
 
-        # 加载预训练 EfficientNet
+        # Load pre-trained EfficientNet
         self.backbone = EfficientNet.from_pretrained(
             backbone if pretrained else 'efficientnet-b0',
             num_classes=num_classes,
@@ -45,7 +45,7 @@ class EfficientNetClassifier(nn.Module):
             drop_connect_rate=drop_connect_rate
         )
 
-        # 获取特征维度
+        # Get feature dimensions
         if 'b0' in backbone:
             self.feature_dim = 1280
         elif 'b1' in backbone:
@@ -59,7 +59,7 @@ class EfficientNetClassifier(nn.Module):
         else:
             self.feature_dim = 1280
 
-        # 替换最后的分类层
+        # Replace the final classification layer
         in_features = self.backbone._fc.in_features
         self.backbone._fc = nn.Sequential(
             nn.Linear(in_features, 512),
@@ -68,11 +68,11 @@ class EfficientNetClassifier(nn.Module):
             nn.Linear(512, num_classes)
         )
 
-        # 初始化分类层权重
+        # Initialize classifier layer weights
         self._init_classifier_weights()
 
     def _init_classifier_weights(self):
-        """初始化分类头权重"""
+        """Initialize classification head weights"""
         for m in self.backbone._fc.modules():
             if isinstance(m, nn.Linear):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -82,17 +82,17 @@ class EfficientNetClassifier(nn.Module):
     def forward(self, x):
         """
         Args:
-            x: (B, 3, H, W) 输入图像
+            x: (B, 3, H, W) Input image tensor
 
         Returns:
-            logits: (B, num_classes) 分类logits
+            logits: (B, num_classes) Classification logits
         """
         logits = self.backbone(x)
         return logits
 
     def get_features(self, x):
-        """提取特征 (用于可视化或 t-SNE)"""
-        # 移除最后的分类层
+        """Extract features (useful for visualization or t-SNE)"""
+        # Extract features by removing the final classification layer
         features = self.backbone.extract_features(x)
         pooled = torch.nn.functional.adaptive_avg_pool2d(features, (1, 1))
         return pooled.view(pooled.size(0), -1)
@@ -104,16 +104,16 @@ def create_efficientnet_model(
     pretrained: bool = True,
     **kwargs
 ) -> EfficientNetClassifier:
-    """创建 EfficientNet 分类器的工厂函数
+    """Factory function to create an EfficientNet Classifier
 
     Args:
-        backbone: 模型类型
-        num_classes: 类别数
-        pretrained: 是否使用预训练权重
-        **kwargs: 其他参数
+        backbone: Model type variant
+        num_classes: Number of classes
+        pretrained: Whether to use pre-trained weights
+        **kwargs: Additional parameters
 
     Returns:
-        model: EfficientNetClassifier 实例
+        model: An instance of EfficientNetClassifier
     """
     model = EfficientNetClassifier(
         num_classes=num_classes,
@@ -126,26 +126,26 @@ def create_efficientnet_model(
 
 
 if __name__ == '__main__':
-    # 测试模型
+    # Model Testing
     model = create_efficientnet_model(
         backbone='efficientnet-b3',
         num_classes=4,
         pretrained=False
     )
 
-    # 计算参数量
+    # Calculate parameter counts
     total_params = sum(p.numel() for p in model.parameters())
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
     print(f"Total parameters: {total_params:,}")
     print(f"Trainable parameters: {trainable_params:,}")
 
-    # 测试前向传播
+    # Test forward pass
     x = torch.randn(2, 3, 256, 256)
     logits = model(x)
     print(f"Input shape: {x.shape}")
     print(f"Output shape: {logits.shape}")
 
-    # 测试特征提取
+    # Test feature extraction
     features = model.get_features(x)
     print(f"Features shape: {features.shape}")
