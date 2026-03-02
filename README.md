@@ -214,6 +214,7 @@ Current local model classes:
 - `textile`
 
 At inference time, classes can also be mapped to coarse categories (`recyclable`, `hazardous`, `kitchen`, `other`) for user-facing guidance.
+
 ---
 
 ## Engineering Highlights
