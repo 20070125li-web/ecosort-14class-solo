@@ -1,57 +1,57 @@
 # EcoSort Baseline Configuration - ResNet50
 
-# 模型配置
+# Model Configuration
 model:
-  type: "resnet"
-  backbone: "resnet50"
-  num_classes: 6
-  pretrained: true
-  dropout: 0.3
-  use_attention: false
+  type: "resnet"               # Backbone network type
+  backbone: "resnet50"         # Specific backbone architecture
+  num_classes: 6               # Number of classification categories
+  pretrained: true             # Whether to use pretrained weights
+  dropout: 0.3                 # Dropout rate to prevent overfitting
+  use_attention: false         # Whether to enable attention mechanism
 
-# 数据配置
+# Data Configuration
 data:
-  root_dir: "data/raw"
-  img_size: 256
-  batch_size: 32
-  num_workers: 4
-  val_split: 0.2
-  shuffle: true
+  root_dir: "data/raw"         # Root directory of raw image data
+  img_size: 256                # Image resize dimension (pixels)
+  batch_size: 32               # Batch size for training/validation
+  num_workers: 4               # Number of worker processes for data loading
+  val_split: 0.2               # Proportion of data used for validation (20%)
+  shuffle: true                # Whether to shuffle training data
 
-# 训练配置
+# Training Configuration
 training:
-  epochs: 50
-  learning_rate: 0.001
-  optimizer: "adamw"
-  weight_decay: 0.0001
-  scheduler: "cosine"
-  use_amp: true
-  early_stopping_patience: 10
-  gradient_clip_val: 1.0
+  epochs: 50                   # Total training epochs
+  learning_rate: 0.001         # Initial learning rate
+  optimizer: "adamw"           # Optimizer type (AdamW)
+  weight_decay: 0.0001         # Weight decay for optimizer (L2 regularization)
+  scheduler: "cosine"          # Learning rate scheduler (cosine annealing)
+  use_amp: true                # Whether to use automatic mixed precision training
+  early_stopping_patience: 10  # Epochs to wait before early stopping (no improvement)
+  gradient_clip_val: 1.0       # Maximum norm for gradient clipping
 
-# 损失函数
+# Loss Function
 loss:
-  type: "cross_entropy"
-  label_smoothing: 0.1
+  type: "cross_entropy"        # Loss function type (cross entropy)
+  label_smoothing: 0.1         # Label smoothing factor to reduce overconfidence
 
-# 数据增强
+# Data Augmentation
 augmentation:
-  horizontal_flip_prob: 0.5
-  vertical_flip_prob: 0.2
-  rotation_degrees: 15
-  color_jitter:
-    brightness: 0.3
-    contrast: 0.3
-    saturation: 0.3
+  horizontal_flip_prob: 0.5    # Probability of horizontal flip augmentation
+  vertical_flip_prob: 0.2      # Probability of vertical flip augmentation
+  rotation_degrees: 15         # Maximum rotation angle (degrees)
+  color_jitter:                # Color jitter augmentation parameters
+    brightness: 0.3            # Brightness variation range
+    contrast: 0.3              # Contrast variation range
+    saturation: 0.3            # Saturation variation range
 
-# 检查点配置
+# Checkpoint Configuration
 checkpoint:
-  dir: "checkpoints"
-  save_interval: 10
-  save_best_only: true
+  dir: "checkpoints"           # Directory to save model checkpoints
+  save_interval: 10            # Epoch interval for saving checkpoints
+  save_best_only: true         # Only save the checkpoint with best validation performance
 
-# WandB 配置
+# WandB Configuration (Weights & Biases)
 wandb:
-  project: "ecosort-classification"
-  entity: null
-  tags: ["baseline", "resnet50"]
+  project: "ecosort-classification"  # WandB project name
+  entity: null                       # WandB entity (team/user name)
+  tags: ["baseline", "resnet50"]     # Tags for experiment organization
