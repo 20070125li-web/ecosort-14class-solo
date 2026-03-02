@@ -5,19 +5,16 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:background="#F5F5F5">
-
-    <!-- 标题 -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="EcoSort - 智能垃圾分类"
+        android:text="EcoSort"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
         android:padding="16dp"
         android:textColor="#2E7D32" />
 
-    <!-- 图像预览 -->
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
@@ -28,12 +25,11 @@
         android:padding="1dp"
         android:src="@android:drawable/ic_menu_gallery" />
 
-    <!-- 分类结果 -->
     <TextView
         android:id="@+id/resultTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="请选择或拍摄垃圾图片"
+        android:text=""
         android:textSize="18sp"
         android:gravity="center"
         android:padding="16dp"
@@ -41,20 +37,18 @@
         android:layout_marginTop="8dp"
         android:textColor="#424242" />
 
-    <!-- 按钮容器 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="16dp">
 
-        <!-- 相机按钮 -->
         <Button
             android:id="@+id/cameraButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="拍照"
+            android:text=""
             android:textSize="16sp"
             android:background="#4CAF50"
             android:textColor="#FFFFFF"
@@ -62,13 +56,12 @@
             android:drawableStart="@android:drawable/ic_menu_camera"
             android:padding="12dp" />
 
-        <!-- 图库按钮 -->
         <Button
             android:id="@+id/galleryButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="图库"
+            android:text=""
             android:textSize="16sp"
             android:background="#2196F3"
             android:textColor="#FFFFFF"
