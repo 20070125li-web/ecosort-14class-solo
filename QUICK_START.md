@@ -48,11 +48,6 @@ Backend API:
 python backend/app.py
 ```
 
-Streamlit demo:
-```bash
-streamlit run streamlit_demo.py
-```
-
 ## 6. Handover Sanity Check
 - Ensure there is at least one runnable checkpoint path in `checkpoints/`.
 - Ensure `configs/dataset_mapping.yaml` is aligned with runtime labels.
