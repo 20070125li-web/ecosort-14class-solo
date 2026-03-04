@@ -40,13 +40,13 @@ Instead of optimizing only for one headline metric, EcoSort prioritizes robustne
 
 Rather than deploying off-the-shelf object detection solutions like YOLO, EcoSort was engineered entirely from scratch to ensure deep architectural control and robust learning.
 
-End-to-End Architecture: Independently constructed and trained detection pipelines utilizing ResNet, EfficientNet, and Vision Transformer (ViT) backbones.
+1. End-to-End Architecture: Independently constructed and trained detection pipelines utilizing ResNet, EfficientNet, and Vision Transformer (ViT) backbones.
 
-Zero Pre-trained Weights: Trained completely from scratch, eschewing any pre-trained weights to fully validate our training regimen.
+2. Zero Pre-trained Weights: Trained completely from scratch, eschewing any pre-trained weights to fully validate our training regimen.
 
-Proprietary Data Curation: Constructed a dedicated dataset by rigorously filtering and multi-dimensionally classifying raw, large-scale web data.
+3. Proprietary Data Curation: Constructed a dedicated dataset by rigorously filtering and multi-dimensionally classifying raw, large-scale web data.
 
-Rigorous Benchmarking: Systematically evaluated multiple model variants, culminating in a custom model that achieves 94.6% performance on the validation set, proving the efficacy of our pipeline design.
+4. Rigorous Benchmarking: Systematically evaluated multiple model variants, culminating in a custom model that achieves 94.6% performance on the validation set, proving the efficacy of our pipeline design.
 
 ---
 
